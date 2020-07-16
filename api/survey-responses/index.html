@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Survey Responses - Survey</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">Survey</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../authentication/" class="dropdown-item">Authentication</a>
+</li>
+                                    
+<li>
+    <a href="../surveys/" class="dropdown-item">Surveys</a>
+</li>
+                                    
+<li>
+    <a href="../questions/" class="dropdown-item">Questions</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active">Survey Responses</a>
+</li>
+                                    
+<li>
+    <a href="../responses/" class="dropdown-item">Responses</a>
+</li>
+                                    
+<li>
+    <a href="../response-options/" class="dropdown-item">Response Options</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../questions/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../responses/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/Ardubro/survey/edit/master/docs/api/survey-responses.md" class="nav-link"><i class="fa fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#survey-responses" class="nav-link">Survey Responses</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#post-a-new-survey" class="nav-link">POST a new survey</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#list-all-surveys" class="nav-link">List all surveys</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#get-survey-response-detail" class="nav-link">GET survey response detail</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#delete-survey-response" class="nav-link">DELETE survey response</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="survey-responses">Survey Responses</h1>
+<p>Supports adding, retrieving, updating and deleting survey responses.</p>
+<p>Survey Response is basically an <strong>response sheet</strong> with responses.</p>
+<h2 id="post-a-new-survey">POST a new survey</h2>
+<p>When posting a new Survey Response, <strong>user_id</strong> (uuid4) is generated and saved to client cookie file.<br>
+This user_id is automatically added to the corresponding survey response instance field.<br>
+It is later used to access only user related survey responses.</p>
+<p>If user_id is found in user cookies, it is validated and used instead of creating a new one.</p>
+<p><strong>Request</strong>:</p>
+<p><code>POST</code> <code>/api/v1/survey-responses/</code></p>
+<p>Parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>survey</td>
+<td>int</td>
+<td>Yes</td>
+<td>Related survey ID.</td>
+</tr>
+<tr>
+<td>responses</td>
+<td>array</td>
+<td>Yes</td>
+<td>Nested <a href="../responses/">responses</a> for the new survey response.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>For responses parameters check <a href="../responses/">Response model.</a></strong></p>
+<p>Survey Response <strong>request data</strong> example:</p>
+<pre><code class="json">{
+    &quot;survey&quot;: 1,
+    &quot;responses&quot;: [
+        {
+            &quot;question&quot;: 7,
+            &quot;response_text&quot;: &quot;mypy&quot;
+        },
+        {
+            &quot;question&quot;: 6,
+            &quot;response_select&quot;: 9
+        },
+        {
+            &quot;question&quot;: 5,
+            &quot;response_select&quot;: [7,8]
+        }
+    ]
+}
+</code></pre>
+
+<p><strong>Response</strong>:</p>
+<pre><code class="json">Content-Type application/json
+201 Created
+
+{
+    &quot;pk&quot;: 2,
+    &quot;user_id&quot;: &quot;857402d9-d573-42de-93f5-6e0f66caa528&quot;,
+    &quot;survey&quot;: 1,
+    &quot;responses&quot;: [
+        {
+            &quot;question&quot;: 7,
+            &quot;question_title&quot;: &quot;Favourite type checker?&quot;,
+            &quot;response_text&quot;: &quot;mypy&quot;,
+            &quot;response_select&quot;: [],
+            &quot;response_select_titles&quot;: []
+        },
+        {
+            &quot;question&quot;: 6,
+            &quot;question_title&quot;: &quot;Favourite linter?&quot;,
+            &quot;response_text&quot;: &quot;&quot;,
+            &quot;response_select&quot;: [
+                9
+            ],
+            &quot;response_select_titles&quot;: [
+                &quot;flake8&quot;
+            ]
+        },
+        {
+            &quot;question&quot;: 5,
+            &quot;question_title&quot;: &quot;What linter plugins/features have you used?&quot;,
+            &quot;response_text&quot;: &quot;&quot;,
+            &quot;response_select&quot;: [
+                7,
+                8
+            ],
+            &quot;response_select_titles&quot;: [
+                &quot;Variable names checker&quot;,
+                &quot;Docstrings check&quot;
+            ]
+        }
+    ]
+}
+
+</code></pre>
+
+<h2 id="list-all-surveys">List all surveys</h2>
+<ul>
+<li>If user is authorized as admin, all survey responses are listed.</li>
+<li>If user is an AnonymousUser, only his survey responses are listed, based on cookies user_id.</li>
+</ul>
+<p><strong>Request</strong>:</p>
+<p><code>GET</code> <code>/api/v1/survey-responses/</code></p>
+<p><strong>Response</strong></p>
+<pre><code class="json">Content-Type application/json
+200 OK
+
+{
+    &quot;count&quot;: 1,
+    &quot;next&quot;: null,
+    &quot;previous&quot;: null,
+    &quot;results&quot;: [
+        # survey response results
+    ]
+}
+</code></pre>
+
+<h2 id="get-survey-response-detail">GET survey response detail</h2>
+<p><strong>Request</strong>:</p>
+<p><code>GET</code> <code>/api/v1/survey-responses/{survey_response_id}/</code></p>
+<p><strong>Response</strong></p>
+<pre><code class="json">Content-Type application/json
+200 OK
+
+{
+    # survey response details
+}
+</code></pre>
+
+<h2 id="delete-survey-response">DELETE survey response</h2>
+<p><code>DELETE</code> <code>/api/v1/survey-responses/{survey_response_id}/</code></p>
+<p><strong>Response</strong>:</p>
+<pre><code class="json">Content-Type application/json
+204 No Content
+</code></pre>
+
+<p><strong>Survey Responses can't be modified.</strong><br>
+<code>PATCH</code> method not allowed.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2020, <a href="https://github.com/ardubro">Ardubro</a>.</p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
