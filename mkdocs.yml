@@ -1,0 +1,16 @@
+site_name: fabrique_survey
+site_description: Surveys service
+repo_url: https://github.com/Ardubro/survey
+site_dir: site
+copyright: Copyright &copy; 2020, <a href="https://github.com/Ardubro">Ardubro</a>.
+dev_addr: 0.0.0.0:8001
+
+nav:
+  - Home: 'index.md'
+  - API:
+    - Authentication: 'api/authentication.md'
+    - Surveys: 'api/surveys.md'
+    - Questions: 'api/questions.md'
+    - Survey Responses: 'api/survey-responses.md'
+    - Responses: 'api/responses.md'
+    - Response Options: 'api/response-options.md'

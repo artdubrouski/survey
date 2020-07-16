@@ -1,0 +1,10 @@
+[run]
+branch = True
+omit = *migrations*,
+       *urls*,
+       *test*,
+       *admin*,
+       ./manage.py,
+       ./fabrique_survey/config/*,
+       ./fabrique_survey/wsgi.py,
+       *__init__*
