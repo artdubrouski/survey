@@ -16,8 +16,8 @@ Start the dev server for local development:
 docker-compose up
 ```
 
-Run a command inside the docker container:
+Testing:
 
 ```bash
-docker-compose run --rm web [command]
+docker-compose run --rm web pytest
 ```
