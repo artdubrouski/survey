@@ -1,46 +1,49 @@
-from typing import Dict, List, NamedTuple
+from typing import Dict, List, NamedTuple, Tuple, Type
 
 from django.db.models import Q
 
 from fabrique_survey.surveys.models import Question, ResponseOption
 
 
-def get_questions_ids(survey_pk: int) -> NamedTuple:
+QID = NamedTuple(
+	'QuestionIDs',
+	[
+		('txt_pk', int),  # pk of a related question with question type 'text'
+		('sel_pk', int),  # ... same of 'select'
+		('selmult_pk', int),  # ... same of 'select multiple'
+	]
+)
+
+RID = NamedTuple(
+	'ResponseOptionsIDs',
+	[
+		# pks of related response options to a question with question type 'select'
+		('sel_pks', List[int]),
+		('sel_mult_pks', List[int]),  # ... same of 'select multiple'
+	]
+)
+
+
+def get_questions_ids(survey_pk: int) -> 'QID':
 	"""Returns relevant to survey question ids."""
-	Qid = NamedTuple(
-		'Qid',
-		[
-			('txt_pk', int),  # pk of a related question with question type 'text'
-			('sel_pk', int),  # ... same of 'select'
-			('selmult_pk', int),  # ... same of 'select multiple'
-		]
-	)
-	Qid.txt_pk = Question.objects.get(
+	txt_pk = Question.objects.get(
 		Q(survey=survey_pk) & Q(title='Question Text')).pk
-	Qid.sel_pk = Question.objects.get(
+	sel_pk = Question.objects.get(
 		Q(survey=survey_pk) & Q(title='Question Select')).pk
-	Qid.selmult_pk = Question.objects.get(
+	selmult_pk = Question.objects.get(
 		Q(survey=survey_pk) & Q(title='Question Select Multiple')).pk
-	return Qid
+	return QID(txt_pk, sel_pk, selmult_pk)
 
 
-def get_response_options_ids(survey_pk: int, sel_pk: int, selmult_pk: int) -> NamedTuple:
+def get_response_options_ids(survey_pk: int, sel_pk: int, selmult_pk: int) -> 'RID':
 	"""Returns relevant to survey response options ids."""
-	Rid = NamedTuple(
-		'Rid',
-		[
-			# pks of related response options to a question with question type 'select'
-			('sel_pks', List[int]),
-			('sel_mult_pks', List[int]),  # ... same of 'select multiple'
-		]
+	sel_pks = list(
+		(int(r.pk) for r in ResponseOption.objects.filter(question=sel_pk)),
 	)
-	Rid.sel_pks = tuple(
-		(r.pk for r in ResponseOption.objects.filter(question=sel_pk)),
+	sel_mult_pks = list(
+		(int(r.pk) for r in ResponseOption.objects.filter(question=selmult_pk)),
 	)
-	Rid.sel_mult_pks = tuple(
-		(r.pk for r in ResponseOption.objects.filter(question=selmult_pk)),
-	)
-	return Rid
+	return RID(sel_pks, sel_mult_pks)
 
 
 def get_survey_response(survey_pk: int) -> Dict:

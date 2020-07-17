@@ -4,7 +4,7 @@ from typing import Tuple
 from django.http import HttpRequest, HttpResponse
 
 
-def is_valid_uuid4(uuid_raw):
+def is_valid_uuid4(uuid_raw: str) -> bool:
     """Checks if uuid found in cookie is valid."""
     try:
         uuid_str = str(uuid_raw)
