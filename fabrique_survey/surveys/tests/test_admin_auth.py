@@ -12,8 +12,8 @@ pytestmark = [pytest.mark.django_db]
 
 def test_admin_can_auth():
     api = APIClient()
-    user = User.objects.create_superuser('ardubro', 'ar@du.bro', 'Ardu12345bro')
-    data = {'username': 'ardubro', 'password': 'Ardu12345bro'}
+    user = User.objects.create_superuser('oleg', 'oleg@ok.com', 'Oleg12345')
+    data = {'username': 'oleg', 'password': 'Oleg12345'}
     response = api.post('/api-token-auth/', data=data, format='json')
     content = response.content.decode('utf-8', errors='ignore')
     got = json.loads(content)

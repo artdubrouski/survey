@@ -95,7 +95,7 @@ def get_surv_resp_with_select_for_text(survey_pk):
 	return survey_response
 
 
-def get_surv_resp_empty_resp_select_for_select(survey_pk):
+def get_sr_empty_resp_opts_for_select(survey_pk):
 	q_txt_pk, q_sel_pk, q_selmult_pk = get_questions_ids(survey_pk)
 	resp_sel, resp_selmult = get_responses_ids(survey_pk, q_sel_pk, q_selmult_pk)
 
@@ -170,7 +170,7 @@ def get_surv_resp_singleselect_for_selectmutli(survey_pk):
 	return survey_response
 
 
-def get_sr_responses_less_than_questions(survey_pk):
+def get_sr_responses_lt_questions(survey_pk):
 	q_txt_pk, q_sel_pk, q_selmult_pk = get_questions_ids(survey_pk)
 	resp_sel, resp_selmult = get_responses_ids(survey_pk, q_sel_pk, q_selmult_pk)
 
@@ -191,7 +191,7 @@ def get_sr_responses_less_than_questions(survey_pk):
 	return survey_response
 
 
-def get_sr_responses_more_than_questions(survey_pk):
+def get_sr_responses_gt_questions(survey_pk):
 	q_txt_pk, q_sel_pk, q_selmult_pk = get_questions_ids(survey_pk)
 	resp_sel, resp_selmult = get_responses_ids(survey_pk, q_sel_pk, q_selmult_pk)
 
@@ -243,7 +243,7 @@ def get_sr_mutselect_for_select(survey_pk):
 	return survey_response
 
 
-def get_sr_responses_on_questions_not_in_survey(survey_pk1, survey_pk2):
+def get_sr_resp_unrelated_questions(survey_pk1, survey_pk2):
 	q_txt_pk1, q_sel_pk1, q_selmult_pk1 = get_questions_ids(survey_pk1)
 	resp_sel1, resp_selmult1 = get_responses_ids(survey_pk1, q_sel_pk1, q_selmult_pk1)
 	q_txt_pk2, q_sel_pk2, q_selmult_pk2 = get_questions_ids(survey_pk2)
@@ -269,7 +269,7 @@ def get_sr_responses_on_questions_not_in_survey(survey_pk1, survey_pk2):
 	return survey_response
 
 
-def get_sr_responses_with_unrelated_responseoptions(survey_pk1, survey_pk2):
+def get_sr_unrelated_resp_options(survey_pk1, survey_pk2):
 	q_txt_pk1, q_sel_pk1, q_selmult_pk1 = get_questions_ids(survey_pk1)
 	resp_sel1, resp_selmult1 = get_responses_ids(survey_pk1, q_sel_pk1, q_selmult_pk1)
 	q_txt_pk2, q_sel_pk2, q_selmult_pk2 = get_questions_ids(survey_pk2)

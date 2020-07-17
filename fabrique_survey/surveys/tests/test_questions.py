@@ -17,12 +17,15 @@ def test_admin_can_delete_question(api_admin, survey_active):
 
 
 @pytest.mark.parametrize('question_type', ['select', 'select multiple'])
-def test_options_cleared_on_changing_qtype_to_text(api_admin, survey_active, question_type):
+def test_opts_cleared_on_qtype_change_to_text(api_admin, survey_active, question_type):
     api_admin.post('/api/v1/surveys/', data=survey_active)
     question_pk = Question.objects.get(question_type=question_type).pk
     got = api_admin.get(f'/api/v1/questions/{question_pk}/')
     assert len(got['response_options']) > 0
-    got = api_admin.patch(f'/api/v1/questions/{question_pk}/', data={'question_type': 'text'})
+    got = api_admin.patch(
+        f'/api/v1/questions/{question_pk}/',
+        data={'question_type': 'text'},
+    )
     assert got['response_options'] == []
 
 
@@ -35,7 +38,10 @@ def test_can_update_questions(api_admin, survey_active, question_type):
 
 def test_can_add_question_to_survey(api_admin, survey_active):
     got = api_admin.post('/api/v1/surveys/', data=survey_active)
-    api_admin.post('/api/v1/questions/', data={'survey': got['pk'], 'title': 'new question'})
+    api_admin.post(
+        '/api/v1/questions/',
+        data={'survey': got['pk'], 'title': 'new question'},
+    )
     got_detail = api_admin.get(f'/api/v1/surveys/{got["pk"]}/')
     assert len(got_detail['questions']) == 4  # initially was 3
 
