@@ -45,9 +45,9 @@ class ResponseSerializer(serializers.ModelSerializer):
 
 	def validate(self, data):
 		question = data.get('question')
-		qtype_is_select = question.question_type == 'select'
-		qtype_is_selectmult = question.question_type == 'select multiple'
-		qtype_is_text = question.question_type == 'text'
+		qtype_is_select = (question.question_type == 'select')
+		qtype_is_selectmult = (question.question_type == 'select multiple')
+		qtype_is_text = (question.question_type == 'text')
 		q_pk, q_title = question.pk, question.title
 
 		if qtype_is_selectmult and len(data.get('response_select', [])) < 2:
@@ -62,7 +62,8 @@ class ResponseSerializer(serializers.ModelSerializer):
 			raise ValidationError(
 				f'response_text field is empty for question {q_pk} "{q_title}"'
 			)
-		if (qtype_is_select or qtype_is_selectmult) and not data.get('response_select'):
+		if ((qtype_is_select or qtype_is_selectmult) and 
+				not data.get('response_select')):
 			raise ValidationError(
 				f'response_select field is empty for question {q_pk} "{q_title}"'
 			)
@@ -85,7 +86,10 @@ class ResponseSerializer(serializers.ModelSerializer):
 
 class QuestionSerializer(WritableNestedModelSerializer):
 	response_options = ResponseOptionSerializer(required=False, many=True)
-	question_type = serializers.ChoiceField(choices=Question.QUESTION_TYPES, required=False)
+	question_type = serializers.ChoiceField(
+		choices=Question.QUESTION_TYPES,
+		required=False,
+	)
 	survey_title = serializers.SerializerMethodField()
 
 	def get_survey_title(self, obj) -> str:
@@ -96,15 +100,19 @@ class QuestionSerializer(WritableNestedModelSerializer):
 			return 'deleted'
 
 	def update(self, instance, validated_data):
-		if instance.question_type in ('select', 'select multiple') and validated_data.get('question_type') == 'text':
+		if (instance.question_type in ('select', 'select multiple') and 
+				validated_data.get('question_type') == 'text'):
 			instance.response_options.clear()
 		return super().update(instance, validated_data)
 
 	def validate(self, data):
 		if data.get('question_type') == 'text' and data.get('response_options'):
-			raise ValidationError('Text response does not require response options')
-		elif data.get('question_type') in ('select', 'select multiple') \
-			and (not data.get('response_options') or len(data.get('response_options'))) == 1:
+			raise ValidationError(
+				'Text response does not require response options'
+			)
+		elif (data.get('question_type') in ('select', 'select multiple') and 
+				(not data.get('response_options') or 
+				len(data.get('response_options'))) == 1):
 			raise ValidationError('Provide at least two response options.')
 		return data
 
@@ -154,7 +162,9 @@ class SurveySerializer(WritableNestedModelSerializer):
 		if data.get('end_date') is None:
 			return data
 		elif data.get('end_date') <= data.get('start_date'):
-			raise serializers.ValidationError('end date should be greater than start date')
+			raise serializers.ValidationError(
+				'end date should be greater than start date'
+			)
 		return data
 
 	class Meta:
@@ -186,13 +196,19 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 		except AttributeError:
 			raise ValidationError('survey ID not provided')
 		if len(responses) < questions.count():
-			raise ValidationError('You have not answered all the survey questions')
+			raise ValidationError(
+				'You have not answered all the survey questions'
+			)
 		elif len(responses) > questions.count():
-			raise ValidationError('You have answered some questions more than once')
+			raise ValidationError(
+				'You have answered some questions more than once'
+			)
 
 	def _validate_response_questions(self, data):
 		"""Check if all the questions are related to the survey."""
-		responses_questions_ids = {resp.get('question').pk for resp in data.get('responses', [])}
+		responses_questions_ids = {
+			resp.get('question').pk for resp in data.get('responses', [])
+		}
 		try:
 			questions = data.get('survey').questions.all()
 		except AttributeError:
@@ -201,7 +217,9 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 
 		if responses_questions_ids < survey_questions_ids:
 			invalid_ids = survey_questions_ids - responses_questions_ids
-			raise ValidationError(f'You haven\'t asnswered questions {invalid_ids}')
+			raise ValidationError(
+				f'You haven\'t asnswered questions {invalid_ids}'
+			)
 		if responses_questions_ids != survey_questions_ids:
 			invalid_ids = responses_questions_ids - survey_questions_ids
 			raise ValidationError(
@@ -215,14 +233,19 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 		for resp in data.get('responses', []):
 			selections = resp.get('response_select')
 			if selections is not None:
-				valid_question = resp.get('question')  # validated earlier in caller func
+				# valid_question is not None - validated earlier in caller func
+				valid_question = resp.get('question')
 				for selection in selections:
 					if selection.question.pk != valid_question.pk:
+						valid_resp_options = valid_question.response_options.all()
 						valid_options = ', '.join(
-							[f'{r.pk} "{r.title}"' for r in valid_question.response_options.all()]
+							[
+								f'{r.pk} "{r.title}"' for r in valid_resp_options
+							]
 						)
 						raise ValidationError(
-							f'Response option {selection.pk} "{selection.title}" is unrelated to the question '
+							f'Response option {selection.pk} "{selection.title}" '
+							'is unrelated to the question '
 							f'{valid_question.pk} "{valid_question.title}". '
 							f'Valid options are: {valid_options}'
 						)
