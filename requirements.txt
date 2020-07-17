@@ -21,6 +21,7 @@ drf-writable-nested==0.6.0
 
 # Developer Tools
 black==19.10b0
+django-stubs==1.5.0
 ipdb==0.13.3
 ipython==7.16.1
 mkdocs==1.1.2
@@ -28,6 +29,7 @@ flake8==3.8.3
 flake8-bugbear==20.1.4
 flake8-commas==2.0.0
 flake8-import-order==0.18.1
+mypy==0.770
 
 # Testing
 pytest==5.4.1
