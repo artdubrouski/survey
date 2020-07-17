@@ -14,7 +14,7 @@ def is_valid_uuid4(uuid_raw: str) -> bool:
         return False
 
 
-def user_id_get_or_create(request) -> Tuple[HttpRequest, bool]:
+def user_id_get_or_create(request: HttpRequest) -> Tuple[HttpRequest, bool]:
     """
     Searches user_id in the cookie, validates it and inserts it into request.
     If user_id not found - generate a new one with uuid4.
@@ -28,8 +28,8 @@ def user_id_get_or_create(request) -> Tuple[HttpRequest, bool]:
     return request, cookie_is_set
 
 
-def set_user_id_cookie(request, response, cookie_is_set: bool) -> HttpResponse:
+def set_user_id_cookie(user_id: str, response: HttpResponse, cookie_is_set: bool) -> HttpResponse:
     """If user_id not found in cookies - sets it."""
     if not cookie_is_set:
-        response.set_cookie('user_id', request.data['user_id'])
+        response.set_cookie('user_id', user_id)
     return response

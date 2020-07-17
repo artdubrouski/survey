@@ -33,7 +33,7 @@ class SurveyResponseViewSet(viewsets.ModelViewSet):
 	def create(self, request, *args, **kwargs):
 		request, cookie_is_set = user_id_get_or_create(request)
 		response = super().create(request, *args, **kwargs)
-		response = set_user_id_cookie(request, response, cookie_is_set)
+		response = set_user_id_cookie(request.data.get('user_id'), response, cookie_is_set)
 		return response
 
 
