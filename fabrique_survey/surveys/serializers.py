@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 
@@ -74,7 +74,7 @@ class ResponseSerializer(serializers.ModelSerializer):
 		self._pop_redundant_fields(data, qtype)
 		return data
 
-	def _pop_redundant_fields(self, data, qtype):
+	def _pop_redundant_fields(self, data, qtype: dict) -> None:
 		if qtype['is_sel'] or qtype['is_selmult']:
 			data.pop('response_text', None)
 		elif qtype['is_txt']:
@@ -142,21 +142,21 @@ class SurveySerializer(WritableNestedModelSerializer):
 	end_date = serializers.DateTimeField(format='%Y-%m-%dT%H:%M:%S')
 
 	def update(self, instance, validated_data):
-		self._validate_start_date_on_update(instance, validated_data)
-		self._validate_end_date_on_update(instance, validated_data)
+		self._validate_start_date_on_update(instance, validated_data.get('start_date'))
+		self._validate_end_date_on_update(instance, validated_data.get('end_date'))
 		return super().update(instance, validated_data)
 
-	def _validate_start_date_on_update(self, instance, validated_data):
+	def _validate_start_date_on_update(self, instance,
+									   updated_start_date: Union[str, None]) -> None:
 		"""Restricts survey start date changing."""
-		updated_start_date = validated_data.get('start_date')
 		if not updated_start_date or updated_start_date == instance.start_date:
 			return
 		if instance.start_date != updated_start_date:
 			raise ValidationError('start_date can\'t be changed')
 
-	def _validate_end_date_on_update(self, instance, validated_data):
+	def _validate_end_date_on_update(self, instance,
+								     updated_end_date: Union[str, None]) -> None:
 		"""Check end date > start date."""
-		updated_end_date = validated_data.get('end_date')
 		if not updated_end_date or updated_end_date == instance.end_date:
 			return
 		if updated_end_date <= instance.start_date:
@@ -193,10 +193,10 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 	def validate(self, data):
 		self._validate_responses_question_equality(data)
 		self._validate_response_questions(data)
-		self._validate_response_options(data)
+		self._validate_response_options(data.get('responses', []))
 		return data
 
-	def _validate_responses_question_equality(self, data):
+	def _validate_responses_question_equality(self, data) -> None:
 		"""Check if responses count equal to questions count."""
 		responses = data.get('responses')
 		try:
@@ -212,7 +212,7 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 				'You have answered some questions more than once'
 			)
 
-	def _validate_response_questions(self, data):
+	def _validate_response_questions(self, data) -> None:
 		"""Check if all the questions are related to the survey."""
 		responses_questions_ids = {
 			resp.get('question').pk for resp in data.get('responses', [])
@@ -234,11 +234,11 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 				f'These questions are not related to the survey: {invalid_ids}'
 			)
 
-	def _validate_response_options(self, data):
+	def _validate_response_options(self, responses: list) -> None:
 		"""
 		Check if all selected response options are related to the question.
 		"""
-		for resp in data.get('responses', []):
+		for resp in responses:
 			selections = resp.get('response_select')
 			if selections is not None:
 				valid_question = resp.get('question')
