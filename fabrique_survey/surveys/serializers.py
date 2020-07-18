@@ -44,34 +44,42 @@ class ResponseSerializer(serializers.ModelSerializer):
 		return super().to_internal_value(data)
 
 	def validate(self, data):
-		question = data.get('question')
-		qtype_is_select = (question.question_type == 'select')
-		qtype_is_selectmult = (question.question_type == 'select multiple')
-		qtype_is_text = (question.question_type == 'text')
+		if (question := data.get('question')) is None:
+			raise ValidationError('Question ID not provided')
+
+		qtype = {
+			'is_sel': (question.question_type == 'select'),
+			'is_selmult': (question.question_type == 'select multiple'),
+			'is_txt': (question.question_type == 'text'),
+		}
 		q_pk, q_title = question.pk, question.title
 
-		if qtype_is_selectmult and len(data.get('response_select', [])) < 2:
+		if qtype['is_selmult'] and len(data.get('response_select', [])) < 2:
 			raise ValidationError(
 				f'Multiple items should be selected for question {q_pk} "{q_title}"'
 			)
-		elif qtype_is_select and len(data.get('response_select', [])) > 1:
+		elif qtype['is_sel'] and len(data.get('response_select', [])) > 1:
 			raise ValidationError(
 				f'Only one item should be selected for question {q_pk} "{q_title}"'
 			)
-		elif qtype_is_text and not data.get('response_text'):
+		elif qtype['is_txt'] and not data.get('response_text'):
 			raise ValidationError(
 				f'response_text field is empty for question {q_pk} "{q_title}"'
 			)
-		if ((qtype_is_select or qtype_is_selectmult) and 
+		if ((qtype['is_sel'] or qtype['is_selmult']) and 
 				not data.get('response_select')):
 			raise ValidationError(
 				f'response_select field is empty for question {q_pk} "{q_title}"'
 			)
-		if qtype_is_select or qtype_is_selectmult:
-			data.pop('response_text', None)
-		elif qtype_is_text:
-			data.pop('response_select', None)
+		self._pop_redundant_fields(data, qtype)
 		return data
+
+	def _pop_redundant_fields(self, data, qtype):
+		if qtype['is_sel'] or qtype['is_selmult']:
+			data.pop('response_text', None)
+		elif qtype['is_txt']:
+			data.pop('response_select', None)
+
 
 	class Meta:
 		model = Response
@@ -233,15 +241,12 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 		for resp in data.get('responses', []):
 			selections = resp.get('response_select')
 			if selections is not None:
-				# valid_question is not None - validated earlier in caller func
 				valid_question = resp.get('question')
 				for selection in selections:
 					if selection.question.pk != valid_question.pk:
 						valid_resp_options = valid_question.response_options.all()
 						valid_options = ', '.join(
-							[
-								f'{r.pk} "{r.title}"' for r in valid_resp_options
-							]
+							[f'{r.pk} "{r.title}"' for r in valid_resp_options]
 						)
 						raise ValidationError(
 							f'Response option {selection.pk} "{selection.title}" '
