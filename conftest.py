@@ -84,25 +84,20 @@ def api_admin():
     return DRFClient(anon=False)
 
 
-@pytest.fixture
-def surv_active():
-    survey = {
-        "title": 'Survey Active',
-        "start_date": str(datetime.now(tz=timezone.utc)),
-        "end_date": str(datetime.now(tz=timezone.utc) + timedelta(days=1)),
-        "questions": [
-            {
-                "title": "Question Text"
-            },
-            {
+class CustomSurvey:
+    def __init__(self):
+        self.title = 'A Survey'
+        self.description = 'A survey description'
+        self.question_txt = {"title": "Question Text"}
+        self.question_sel = {
                 "title": "Question Select",
                 "question_type": "select",
                 "response_options": [
                     {"title": "one"},
                     {"title": "two"}
                 ]
-            },
-            {
+            }
+        self.question_selmult = {
                 "title": "Question Select Multiple",
                 "question_type": "select multiple",
                 "response_options": [
@@ -111,102 +106,39 @@ def surv_active():
                     {"title": "three"}
                 ]
             }
-        ]
-    }
+    
+    def generate_survey(self, title=None, description=None, start_date=None, end_date=None):
+        survey = {
+            'title': title or self.title,
+            'description': description or self.description,
+            'start_date': start_date or str(datetime.now(tz=timezone.utc)),
+            'end_date': end_date or str(datetime.now(tz=timezone.utc) + timedelta(days=1)),
+            'questions': [self.question_txt, self.question_sel, self.question_selmult]
+        }
+        return survey
+
+
+@pytest.fixture
+def surv_active():
+    survey = CustomSurvey().generate_survey()
     return survey
 
 
 @pytest.fixture
 def surv_active2():
-    survey = {
-        "title": 'Survey Active 2',
-        "start_date": str(datetime.now(tz=timezone.utc)),
-        "end_date": str(datetime.now(tz=timezone.utc) + timedelta(days=1)),
-        "questions": [
-            {
-                "title": "Question Text"
-            },
-            {
-                "title": "Question Select",
-                "question_type": "select",
-                "response_options": [
-                    {"title": "one 2"},
-                    {"title": "two 2"}
-                ]
-            },
-            {
-                "title": "Question Select Multiple",
-                "question_type": "select multiple",
-                "response_options": [
-                    {"title": "one 2"},
-                    {"title": "two 2"},
-                    {"title": "three 2"}
-                ]
-            }
-        ]
-    }
+    survey = CustomSurvey().generate_survey(title='Survey 2')
     return survey
 
 
 @pytest.fixture
 def survey_overdue():
-    survey = {
-        "title": 'Survey Overdue',
-        "start_date": str(datetime.now(tz=timezone.utc) - timedelta(days=1)),
-        "end_date": str(datetime.now(tz=timezone.utc) - timedelta(seconds=1)),
-        "questions": [
-            {
-                "title": "Question Text"
-            },
-            {
-                "title": "Question Select",
-                "question_type": "select",
-                "response_options": [
-                    {"title": "one"},
-                    {"title": "two"}
-                ]
-            },
-            {
-                "title": "Question Select Multiple",
-                "question_type": "select multiple",
-                "response_options": [
-                    {"title": "one"},
-                    {"title": "two"},
-                    {"title": "three"}
-                ]
-            }
-        ]
-    }
-    return survey
+    start_date = str(datetime.now(tz=timezone.utc) - timedelta(days=1))
+    end_date = str(datetime.now(tz=timezone.utc) - timedelta(seconds=1))
+    return CustomSurvey().generate_survey(start_date=start_date, end_date=end_date)
 
 
 @pytest.fixture
 def survey_invalid_end_date():
-    survey = {
-        "title": 'Survey Overdue',
-        "start_date": str(datetime.now(tz=timezone.utc)),
-        "end_date": str(datetime.now(tz=timezone.utc) - timedelta(minutes=1)),
-        "questions": [
-            {
-                "title": "Question Text"
-            },
-            {
-                "title": "Question Select",
-                "question_type": "select",
-                "response_options": [
-                    {"title": "one"},
-                    {"title": "two"}
-                ]
-            },
-            {
-                "title": "Question Select Multiple",
-                "question_type": "select multiple",
-                "response_options": [
-                    {"title": "one"},
-                    {"title": "two"},
-                    {"title": "three"}
-                ]
-            }
-        ]
-    }
-    return survey
+    start_date = str(datetime.now(tz=timezone.utc))
+    end_date = str(datetime.now(tz=timezone.utc) - timedelta(minutes=1))
+    return CustomSurvey().generate_survey(start_date=start_date, end_date=end_date)
