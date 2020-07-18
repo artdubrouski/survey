@@ -7,7 +7,7 @@ from .serializers import (
 	SurveyResponseSerializer,
 	SurveySerializer,
 )
-from .services import set_user_id_cookie, user_id_get_or_create
+from .services import set_user_id_to_cookie, user_id_get_or_create
 
 
 class QuestionSerializerViewSet(viewsets.ModelViewSet):
@@ -31,9 +31,9 @@ class SurveyResponseViewSet(viewsets.ModelViewSet):
 			return SurveyResponse.objects.by_user(user_id)
 
 	def create(self, request, *args, **kwargs):
-		request, cookie_is_set = user_id_get_or_create(request)
+		cookie_is_set = user_id_get_or_create(request)
 		response = super().create(request, *args, **kwargs)
-		response = set_user_id_cookie(request.data.get('user_id'), response, cookie_is_set)
+		set_user_id_to_cookie(request.data.get('user_id'), response, cookie_is_set)
 		return response
 
 
