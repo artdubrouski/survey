@@ -8,8 +8,6 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
 
-from fabrique_survey.surveys.tests.utils import get_survey_response
-
 
 class DRFClient(APIClient):
     def __init__(self, user=None, anon=True, *args, **kwargs):
@@ -87,7 +85,7 @@ def api_admin():
 
 
 @pytest.fixture
-def survey_active():
+def surv_active():
     survey = {
         "title": 'Survey Active',
         "start_date": str(datetime.now(tz=timezone.utc)),
@@ -119,7 +117,7 @@ def survey_active():
 
 
 @pytest.fixture
-def survey_active_another():
+def surv_active2():
     survey = {
         "title": 'Survey Active 2',
         "start_date": str(datetime.now(tz=timezone.utc)),

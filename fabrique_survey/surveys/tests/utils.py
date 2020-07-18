@@ -46,317 +46,142 @@ def get_response_options_ids(survey_pk: int, sel_pk: int, selmult_pk: int) -> 'R
 	return RID(sel_pks, sel_mult_pks)
 
 
-def get_survey_response(survey_pk: int) -> Dict:
-	"""Returns a valid survey response"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
+class CustomSurveyResponse:
+	def __init__(self, survey_pk: int) -> None:
+		self.survey_pk = survey_pk
+		self.Qid = get_questions_ids(survey_pk)
+		self.Rid = get_response_options_ids(survey_pk, self.Qid.sel_pk, self.Qid.selmult_pk)
+		self.txt_response = {
+			"question": self.Qid.txt_pk,
+			"response_text": "textt"
+		}
+		self.sel_response = {
+			"question": self.Qid.sel_pk,
+			"response_select": self.Rid.sel_pks[1]
+		}
+		self.selmult_response = {
+			"question": self.Qid.selmult_pk,
+			"response_select": [self.Rid.sel_mult_pks[0], self.Rid.sel_mult_pks[2]]
+		}
 
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "textt",
-			},
-			{
-				"question": Qid.sel_pk,
-				"response_select": Rid.sel_pks[1],
-			},
-			{
-				"question": Qid.selmult_pk,
-				"response_select": [Rid.sel_mult_pks[0], Rid.sel_mult_pks[2]],
-			},
-		],
-	}
-	return survey_response
+	def _generate_survey_response(self) -> Dict:
+		"""Returns a survey resonse based on all self.responses."""
+		survey_response = {
+			"survey": self.survey_pk,
+			"responses": [self.txt_response, self.sel_response, self.selmult_response],
+		}
+		return survey_response
 
+	def _set_self_qid2_self_rid2(self, survey_pk2: int) -> Dict:
+		"""Add another question and response ids to self."""
+		self.Qid2 = get_questions_ids(survey_pk2)
+		self.Rid2 = get_response_options_ids(survey_pk2, self.Qid2.sel_pk, self.Qid2.selmult_pk)
 
-def get_another_survey_resp(survey_pk: int) -> Dict:
-	"""Returns another valid survey response"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
+	def get_valid_sr(self) -> Dict:
+		"""Returns a valid survey response."""
+		return self._generate_survey_response()
+	
+	def get_another_valid_sr(self) -> Dict:
+		"""
+		Returns another valid survey response with
+		modified responses.
+		"""
+		self.txt_response['response_text'] = 'text2'
+		self.sel_response['response_select'] = self.Rid.sel_pks[0]
+		self.selmult_response['response_select'] = [
+			self.Rid.sel_mult_pks[1],
+			self.Rid.sel_mult_pks[2]
+		]
+		return self._generate_survey_response()
 
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "text2",
-			},
-			{
-				"question": Qid.sel_pk,
-				"response_select": Rid.sel_pks[0],
-			},
-			{
-				"question": Qid.selmult_pk,
-				"response_select": [Rid.sel_mult_pks[1], Rid.sel_mult_pks[2]],
-			},
-		],
-	}
-	return survey_response
+	def get_invalid_sr_redundant_select_for_text(self) -> Dict:
+		"""
+		Returns a valid survey response, with
+		redundant response_select option for text question type.
+		"""
+		self.txt_response['response_select'] = self.Rid.sel_pks[0]
+		return self._generate_survey_response()
 
+	def get_valid_sr_redundant_text_for_select(self) -> Dict:
+		"""
+		Returns a valid survey response, but with redundant
+		response_text option for select question type.
+		"""
+		self.sel_response['response_text'] = 'text_sel'
+		return self._generate_survey_response()
 
-def get_surv_resp_with_select_for_text(survey_pk: int) -> Dict:
-	"""
-	Returns a valid survey response,
-	but with redundant response_select option for text question type.
-	"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
+	def get_invalid_sr_empty_resp_opts_for_select(self) -> Dict:
+		"""
+		Returns an invalid survey response, with
+		no requiried response_select option for select question type.
+		"""
+		self.sel_response.pop('response_select')
+		return self._generate_survey_response()
 
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "textt",
-				"response_select": Rid.sel_pks[0]},  # redundant
-			{
-				"question": Qid.sel_pk,
-				"response_select": Rid.sel_pks[1],
-			},
-			{
-				"question": Qid.selmult_pk,
-				"response_select": [Rid.sel_mult_pks[0], Rid.sel_mult_pks[2]],
-			},
-		],
-	}
-	return survey_response
+	def get_invalid_sr_singleselect_for_selectmult(self) -> Dict:
+		"""
+		Returns an invalid survey response, with an integer in
+		response_select option for select multiple question type,
+		which require a List[int] in response_select field.
+		"""
+		self.selmult_response['response_select'] = self.Rid.sel_mult_pks[0]
+		return self._generate_survey_response()
 
+	def get_invalid_sr_mutselect_for_select(self) -> Dict:
+		"""
+		Returns an invalid survey response, with an List[int] in
+		select option for select question type, which require 
+		an int or a list with one int in response_select field.
+		"""
+		self.sel_response['response_select'] = [
+			self.Rid.sel_mult_pks[1],self.Rid.sel_mult_pks[2],
+		]
+		return self._generate_survey_response()
+	
+	def get_invalid_sr_responses_lt_questions(self) -> Dict:
+		"""
+		Returns an invalid survey response, with
+		num of responses < num of related survey questions.
+		"""
+		survey_response = self._generate_survey_response()
+		survey_response['responses'].pop()
+		return survey_response
 
-def get_sr_empty_resp_opts_for_select(survey_pk: int) -> Dict:
-	"""
-	Returns an invalid survey response, with
-	no requiried response_select option for select question type.
-	"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
-
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "textt",
-			},
-			{
-				"question": Qid.sel_pk,  # invalid
-			},
-			{
-				"question": Qid.selmult_pk,
-				"response_select": [Rid.sel_mult_pks[0], Rid.sel_mult_pks[2]],
-			},
-		],
-	}
-	return survey_response
-
-
-def get_survey_response_text_for_select(survey_pk: int) -> Dict:
-	"""
-	Returns a valid survey response, but with redundant
-	response_text option for select question type.
-	"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
-
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "text",
-			},
-			{
-				"question": Qid.sel_pk,
-				"response_text": "text_sel",  # redundant
-				"response_select": Rid.sel_pks[1],
-			},
-			{
-				"question": Qid.selmult_pk,
-				"response_text": "text_selmult",
-				"response_select": [Rid.sel_mult_pks[0], Rid.sel_mult_pks[2]],
-			},
-		],
-	}
-	return survey_response
-
-
-def get_surv_resp_singleselect_for_selectmutli(survey_pk: int) -> Dict:
-	"""
-	Returns an invalid survey response, with an integer in
-	response_select option for select multiple question type,
-	which require a List[int] in response_select field.
-	"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
-
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "textt",
-			},
-			{
-				"question": Qid.sel_pk,
-				"response_text": "textt2",
-				"response_select": Rid.sel_mult_pks[1],
-			},
-			{
-				"question": Qid.selmult_pk,
-				"response_text": "textt3",
-				"response_select": Rid.sel_mult_pks[0],  # invalid
-			},
-		],
-	}
-	return survey_response
-
-
-def get_sr_responses_lt_questions(survey_pk: int) -> Dict:
-	"""
-	Returns an invalid survey response, with
-	num of responses < num of related survey questions.
-	"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
-
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "text",
-			},
-			{
-				"question": Qid.sel_pk,
-				"response_select": Rid.sel_mult_pks[1],
-			},
-			# invalid - should be one more response
-		],
-	}
-	return survey_response
-
-
-def get_sr_responses_gt_questions(survey_pk: int) -> Dict:
-	"""
-	Returns an invalid survey response, with
-	num of responses > num of related survey questions.
-	"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
-
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "textt",
-			},
-			{
-				"question": Qid.sel_pk,
-				"response_select": Rid.sel_mult_pks[1],
-			},
-			{
-				"question": Qid.selmult_pk,
-				"response_select": [Rid.sel_mult_pks[0], Rid.sel_mult_pks[2]],
-			},
-			{
-				# invalid - duplicated question response
-				"question": Qid.txt_pk,
+	def get_invalid_sr_responses_gt_questions(self) -> Dict:
+		"""
+		Returns an invalid survey response, with
+		num of responses > num of related survey questions.
+		"""
+		survey_response = self._generate_survey_response()
+		redundant_response = {
+				"question": self.Qid.txt_pk,
 				"response_text": "changed my mind",
-			},
-		],
-	}
-	return survey_response
+			}
+		survey_response['responses'].append(redundant_response)
+		return survey_response
 
+	def get_invalid_sr_unrelated_questions(self, survey_pk2: int) -> Dict:
+		"""
+		Returns an invalid survey response, with responses
+		to unrelated questions to the survey.
+		"""
+		self._set_self_qid2_self_rid2(survey_pk2)
+		self.sel_response['question'] = self.Qid2.sel_pk
+		self.sel_response['response_select'] = self.Rid2.sel_pks[1]
+		return self._generate_survey_response()
 
-def get_sr_mutselect_for_select(survey_pk: int) -> Dict:
-	"""
-	Returns an invalid survey response, with an List[int] in
-	select option for select question type, which require 
-	an int or a list with one int in response_select field.
-	"""
-	Qid = get_questions_ids(survey_pk)
-	Rid = get_response_options_ids(survey_pk, Qid.sel_pk, Qid.selmult_pk)
-
-	survey_response = {
-		"survey": survey_pk,
-		"responses": [
-			{
-				"question": Qid.txt_pk,
-				"response_text": "textt",
-			},
-			{
-				"question": Qid.sel_pk,
-				"response_select": [Rid.sel_mult_pks[1], Rid.sel_mult_pks[2]],  # invalid
-			},
-			{
-				"question": Qid.selmult_pk,
-				"response_select": [Rid.sel_mult_pks[0], Rid.sel_mult_pks[2]],
-			},
-		],
-	}
-	return survey_response
-
-
-def get_sr_resp_unrelated_questions(survey_pk1: int, survey_pk2: int) -> Dict:
-	"""
-	Returns an invalid survey response, with responses
-	to unrelated questions to the survey.
-	"""
-	Qid1 = get_questions_ids(survey_pk1)
-	Rid1 = get_response_options_ids(survey_pk1, Qid1.sel_pk, Qid1.selmult_pk)
-	Qid2 = get_questions_ids(survey_pk2)
-	Rid2 = get_response_options_ids(survey_pk2, Qid2.sel_pk, Qid2.selmult_pk)
-
-	survey_response = {
-		"survey": survey_pk1,
-		"responses": [
-			{
-				"question": Qid1.txt_pk,
-				"response_text": "textt",
-			},
-			{
-				"question": Qid2.sel_pk,  # invalid question id
-				"response_select": Rid2.sel_pks[1],
-			},
-			{
-				"question": Qid1.selmult_pk,
-				"response_select": [Rid1.sel_mult_pks[0], Rid1.sel_mult_pks[2]],
-			},
-		],
-	}
-	return survey_response
-
-
-def get_sr_unrelated_resp_options(survey_pk1, survey_pk2):
-	"""
-	Returns an invalid survey response, with response options
-	unrelated to the question.
-	"""
-	Qid1 = get_questions_ids(survey_pk1)
-	Rid1 = get_response_options_ids(survey_pk1, Qid1.sel_pk, Qid1.selmult_pk)
-	Qid2 = get_questions_ids(survey_pk2)
-	Rid2 = get_response_options_ids(survey_pk2, Qid2.sel_pk, Qid2.selmult_pk)
-
-	survey_response = {
-		"survey": survey_pk1,
-		"responses": [
-			{
-				"question": Qid1.txt_pk,
-				"response_text": "textt",
-			},
-			{
-				"question": Qid1.sel_pk,
-				"response_select": Rid2.sel_mult_pks[1],  # invalid response option id
-			},
-			{
-				"question": Qid1.selmult_pk,
-				"response_select": [Rid2.sel_mult_pks[0], Rid1.sel_mult_pks[2]],
-			},
-		],
-	}
-	return survey_response
+	def get_invalid_sr_unrelated_resp_options(self, survey_pk2: int) -> Dict:
+		"""
+		Returns an invalid survey response, with response options
+		unrelated to the question.
+		"""
+		self._set_self_qid2_self_rid2(survey_pk2)
+		self.sel_response['response_select'] = self.Rid2.sel_pks[1]
+		self.selmult_response['response_select'] = [
+			self.Rid2.sel_mult_pks[0],
+			self.Rid.sel_mult_pks[2],
+		]
+		return self._generate_survey_response()
 
 
 """
