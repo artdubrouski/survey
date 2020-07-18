@@ -20,6 +20,17 @@ def test_cant_response_without_survey_id(api_admin, api_user, surv_active):
     )
 
 
+def test_cant_response_without_question_id(api_admin, api_user, surv_active):
+    admin_got = api_admin.post('/api/v1/surveys/', data=surv_active)
+    survey_response = CustomSurveyResponse(admin_got['pk']).get_valid_sr()
+    survey_response['responses'][0].pop('question')
+    api_user.post(
+        '/api/v1/survey-responses/',
+        data=survey_response,
+        expected_status_code=400,
+    )
+
+
 def test_cant_response_without_responses(api_admin, api_user, surv_active):
     admin_got = api_admin.post('/api/v1/surveys/', data=surv_active)
     survey_response = CustomSurveyResponse(admin_got['pk']).get_valid_sr()
