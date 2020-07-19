@@ -1,15 +1,18 @@
-FROM python:3.8
+FROM python:3.8-slim-buster
+
 ENV PYTHONUNBUFFERED 1
+ENV DEBIAN_FRONTEND noninteractive
 
-# Allows docker to cache installed dependencies between builds
+RUN apt-get update && apt-get --no-install-recommends install -y \
+    gettext libpq-dev build-essential libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY ./requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Adds our application code to the image
 COPY . code
-WORKDIR code
+WORKDIR /code
 
 EXPOSE 8000
 
-# Run the production server
 CMD newrelic-admin run-program gunicorn --bind 0.0.0.0:$PORT --access-logfile - fabrique_survey.wsgi:application
