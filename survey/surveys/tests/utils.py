@@ -2,7 +2,7 @@ from typing import Dict, List, NamedTuple, Tuple, Type
 
 from django.db.models import Q
 
-from fabrique_survey.surveys.models import Question, ResponseOption
+from survey.surveys.models import Question, ResponseOption
 
 
 QID = NamedTuple(
@@ -65,7 +65,7 @@ class CustomSurveyResponse:
 		}
 
 	def _generate_survey_response(self) -> Dict:
-		"""Returns a survey resonse based on all self.responses."""
+		"""Returns a survey response based on all self.responses."""
 		survey_response = {
 			"survey": self.survey_pk,
 			"responses": [self.txt_response, self.sel_response, self.selmult_response],
@@ -220,9 +220,18 @@ class CustomSurveyResponse:
 {
 	"survey": 1,
 	"responses": [
-		{"question": 1, "response_text": "Yep, from kindergarden"},
-		{"question": 2, "response_select": 2},
-		{"question": 3, "response_select": [3,5]}
-		]
+		{
+			"question": 1,
+			"response_text": "Yep, from kindergarden"
+		},
+		{
+			"question": 2,
+			"response_select": 2
+		},
+		{
+			"question": 3,
+			"response_select": [3,5]
+		}
+	]
 }
 """

@@ -6,9 +6,6 @@ services:
 
   web:
     restart: always
-    environment:
-      - DJANGO_SECRET_KEY=local
-      - DEBUG=false
     image: web
     build: ./
     command: >
@@ -22,12 +19,3 @@ services:
       - "8000:8000"
     depends_on:
       - postgres
-
-  documentation:
-    restart: always
-    build: ./
-    command: "mkdocs serve"
-    volumes:
-      - ./:/code
-    ports:
-      - "8001:8001"

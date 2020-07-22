@@ -1,4 +1,4 @@
-from fabrique_survey.surveys.services import is_valid_uuid4
+from survey.surveys.services import is_valid_uuid4
 
 import pytest
 

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 
@@ -25,6 +26,7 @@ class Survey(models.Model):
 		verbose_name = 'Survey'
 		verbose_name_plural = 'Surveys'
 		ordering = ['start_date', 'title']
+
 
 	def __str__(self):
 		return self.title
@@ -106,8 +108,12 @@ class Response(models.Model):
 
 
 class SurveyResponseQuerySet(models.QuerySet):
-	def by_user(self, user_id):
+	def by_user(self, user_id:str):
 		return self.filter(user_id=user_id)
+
+	def has_user_already_taken_survey(self, survey_pk:int, user_id: str) -> bool:
+		"""Returns True if user has already taken the survey previously."""
+		return self.filter(Q(survey=survey_pk) & Q(user_id=user_id)).exists()
 
 
 class SurveyResponse(models.Model):

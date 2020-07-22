@@ -20,17 +20,14 @@ class Common(Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
 
-        # Third party apps
-        'rest_framework',            # utilities for rest apis
-        'rest_framework.authtoken',  # token authentication
-        'django_filters',            # for filtering rest endpoints
+        'rest_framework',
+        'rest_framework.authtoken',
+        'django_filters',
 
-        # Your apps
-        'fabrique_survey.surveys',
+        'survey.surveys',
 
     )
 
-    # https://docs.djangoproject.com/en/2.0/topics/http/middleware/
     MIDDLEWARE = (
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
@@ -42,9 +39,9 @@ class Common(Configuration):
     )
 
     ALLOWED_HOSTS = ["*"]
-    ROOT_URLCONF = 'fabrique_survey.urls'
+    ROOT_URLCONF = 'survey.urls'
     SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-    WSGI_APPLICATION = 'fabrique_survey.wsgi.application'
+    WSGI_APPLICATION = 'survey.wsgi.application'
 
     # Email
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -53,12 +50,12 @@ class Common(Configuration):
         ('Author', 'ardubrovski at gmail.com'),
     )
 
-    # Postgres
+
     DATABASES = {
         'default': dj_database_url.config(
-            default='postgres://postgres:@postgres:5432/postgres',
+            default=os.getenv('DATABASE_URL'),
             conn_max_age=int(os.getenv('POSTGRES_CONN_MAX_AGE', 600)),
-        ),
+        )
     }
 
     # General
@@ -72,8 +69,6 @@ class Common(Configuration):
     USE_TZ = True
     LOGIN_REDIRECT_URL = '/'
 
-    # Static files (CSS, JavaScript, Images)
-    # https://docs.djangoproject.com/en/2.0/howto/static-files/
     STATIC_ROOT = os.path.normpath(join(os.path.dirname(BASE_DIR), 'static'))
     STATICFILES_DIRS = []
     STATIC_URL = '/static/'
@@ -82,7 +77,6 @@ class Common(Configuration):
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     )
 
-    # Media files
     MEDIA_ROOT = join(os.path.dirname(BASE_DIR), 'media')
     MEDIA_URL = '/media/'
 
@@ -102,12 +96,8 @@ class Common(Configuration):
         },
     ]
 
-    # Set DEBUG to False as a default for safety
-    # https://docs.djangoproject.com/en/dev/ref/settings/#debug
     DEBUG = strtobool(os.getenv('DJANGO_DEBUG', 'False'))
 
-    # Password Validation
-    # https://docs.djangoproject.com/en/2.0/topics/auth/passwords/#module-django.contrib.auth.password_validation
     AUTH_PASSWORD_VALIDATORS = [
         {
             'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -123,7 +113,6 @@ class Common(Configuration):
         },
     ]
 
-    # Logging
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': False,
@@ -182,7 +171,6 @@ class Common(Configuration):
         },
     }
 
-    # Django Rest Framework
     REST_FRAMEWORK = {
         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
         'PAGE_SIZE': int(os.getenv('DJANGO_PAGINATION_LIMIT', 10)),

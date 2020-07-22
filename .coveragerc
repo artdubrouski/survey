@@ -5,6 +5,6 @@ omit = *migrations*,
        *test*,
        *admin*,
        ./manage.py,
-       ./fabrique_survey/config/*,
-       ./fabrique_survey/wsgi.py,
+       ./survey/config/*,
+       ./survey/wsgi.py,
        *__init__*

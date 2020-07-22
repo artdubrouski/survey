@@ -2,7 +2,7 @@ from typing import List, Union
 
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 
-from fabrique_survey.surveys.models import (
+from survey.surveys.models import (
 	Question,
 	Response,
 	ResponseOption,
@@ -191,16 +191,26 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 	responses = ResponseSerializer(many=True)
 
 	def validate(self, data):
-		self._validate_responses_question_equality(data)
-		self._validate_response_questions(data)
-		self._validate_response_options(data.get('responses', []))
+		survey = data.get('survey')
+		responses = data.get('responses', [])
+		self._validate_user_not_already_taken_survey(survey)
+		self._validate_responses_question_equality(responses, survey)
+		self._validate_response_questions(responses, survey)
+		self._validate_response_options(responses)
 		return data
+	
+	def _validate_user_not_already_taken_survey(self, survey):
+		"""Check if user takes the survey for the first time."""
+		user_id = self.context['request'].COOKIES.get('user_id')
+		if user_id is None:
+			return
+		if SurveyResponse.objects.has_user_already_taken_survey(survey.pk, user_id):
+			raise ValidationError(f'You\'ve already taken survey "{survey}" before')
 
-	def _validate_responses_question_equality(self, data) -> None:
+	def _validate_responses_question_equality(self, responses, survey) -> None:
 		"""Check if responses count equal to questions count."""
-		responses = data.get('responses')
 		try:
-			questions = data.get('survey').questions
+			questions = survey.questions
 		except AttributeError:
 			raise ValidationError('survey ID not provided')
 		if len(responses) < questions.count():
@@ -212,13 +222,11 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 				'You have answered some questions more than once'
 			)
 
-	def _validate_response_questions(self, data) -> None:
+	def _validate_response_questions(self, responses, survey) -> None:
 		"""Check if all the questions are related to the survey."""
-		responses_questions_ids = {
-			resp.get('question').pk for resp in data.get('responses', [])
-		}
+		responses_questions_ids = {resp.get('question').pk for resp in responses}
 		try:
-			questions = data.get('survey').questions.all()
+			questions = survey.questions.all()
 		except AttributeError:
 			raise ValidationError('Provide questions to which you respond.')
 		survey_questions_ids = {q.pk for q in questions}

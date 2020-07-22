@@ -1,4 +1,4 @@
-from fabrique_survey.surveys.models import Question
+from survey.surveys.models import Question
 
 import pytest
 
