@@ -1,13 +1,17 @@
 import os
-from distutils.util import strtobool
 from os.path import join
 
 from configurations import Configuration
 
 import dj_database_url
 
+import environ
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ROOT_DIR = environ.Path(__file__) - 3  # three folder back (/a/b/c/ - 3 = /)
+
+env = environ.Env(DEBUG=(bool, False))
+env.read_env(str(ROOT_DIR.path('.env')))
 
 
 class Common(Configuration):
@@ -39,8 +43,21 @@ class Common(Configuration):
     )
 
     ALLOWED_HOSTS = ["*"]
+
+    DEBUG = env.bool('DJANGO_DEBUG', False)
+
+    # hide DATABASE_URL in .env file for production
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=env.str('DATABASE_URL', 'postgres://postgres:@postgres:5432/postgres'),
+            conn_max_age=env.int('POSTGRES_CONN_MAX_AGE', 600),
+        )
+    }
+
+    # hide SECRET_KEY in .env file for production
+    SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'h1de-me')
+
     ROOT_URLCONF = 'survey.urls'
-    SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
     WSGI_APPLICATION = 'survey.wsgi.application'
 
     # Email
@@ -49,14 +66,6 @@ class Common(Configuration):
     ADMINS = (
         ('Author', 'ardubrovski at gmail.com'),
     )
-
-
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
-            conn_max_age=int(os.getenv('POSTGRES_CONN_MAX_AGE', 600)),
-        )
-    }
 
     # General
     APPEND_SLASH = False
@@ -69,7 +78,7 @@ class Common(Configuration):
     USE_TZ = True
     LOGIN_REDIRECT_URL = '/'
 
-    STATIC_ROOT = os.path.normpath(join(os.path.dirname(BASE_DIR), 'static'))
+    STATIC_ROOT = os.path.normpath(join(os.path.dirname(ROOT_DIR), 'static'))
     STATICFILES_DIRS = []
     STATIC_URL = '/static/'
     STATICFILES_FINDERS = (
@@ -77,7 +86,7 @@ class Common(Configuration):
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     )
 
-    MEDIA_ROOT = join(os.path.dirname(BASE_DIR), 'media')
+    MEDIA_ROOT = join(os.path.dirname(ROOT_DIR), 'media')
     MEDIA_URL = '/media/'
 
     TEMPLATES = [
@@ -95,8 +104,6 @@ class Common(Configuration):
             },
         },
     ]
-
-    DEBUG = strtobool(os.getenv('DJANGO_DEBUG', 'False'))
 
     AUTH_PASSWORD_VALIDATORS = [
         {
@@ -173,7 +180,7 @@ class Common(Configuration):
 
     REST_FRAMEWORK = {
         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-        'PAGE_SIZE': int(os.getenv('DJANGO_PAGINATION_LIMIT', 10)),
+        'PAGE_SIZE': env.int('DJANGO_PAGINATION_LIMIT', 10),
         'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S%z',
         'DEFAULT_RENDERER_CLASSES': (
             'rest_framework.renderers.JSONRenderer',
