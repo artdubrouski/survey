@@ -1,12 +1,13 @@
 import json
+from datetime import datetime, timedelta
+
+from django.contrib.auth.models import User
+from django.utils import timezone
 
 import pytest
 
-from datetime import datetime, timedelta
-from django.contrib.auth.models import User
-from django.utils import timezone
-from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
 
 class DRFClient(APIClient):
@@ -90,23 +91,23 @@ class CustomSurvey:
         self.description = 'A survey description'
         self.question_txt = {"title": "Question Text"}
         self.question_sel = {
-                "title": "Question Select",
-                "question_type": "select",
-                "response_options": [
-                    {"title": "one"},
-                    {"title": "two"}
-                ]
-            }
+            "title": "Question Select",
+            "question_type": "select",
+            "response_options": [
+                {"title": "one"},
+                {"title": "two"}
+            ]
+        }
         self.question_selmult = {
-                "title": "Question Select Multiple",
-                "question_type": "select multiple",
-                "response_options": [
-                    {"title": "one"},
-                    {"title": "two"},
-                    {"title": "three"}
-                ]
-            }
-    
+            "title": "Question Select Multiple",
+            "question_type": "select multiple",
+            "response_options": [
+                {"title": "one"},
+                {"title": "two"},
+                {"title": "three"}
+            ]
+        }
+
     def generate_survey(self, title=None, description=None, start_date=None, end_date=None):
         survey = {
             'title': title or self.title,

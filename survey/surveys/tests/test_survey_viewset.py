@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 
 from django.utils import timezone
 
-from survey.surveys.models import Question
-
 import pytest
+
+from survey.surveys.models import Question
 
 
 pytestmark = [pytest.mark.django_db]

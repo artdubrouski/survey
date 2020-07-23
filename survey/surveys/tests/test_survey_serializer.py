@@ -44,11 +44,15 @@ def test_can_update_survey_fields(api_admin, surv_active, data):
     api_admin.patch(f'/api/v1/surveys/{got["pk"]}/', data=data)
 
 
+def test_questions_created_with_survey(api_admin, surv_active):
+    api_admin.post('/api/v1/surveys/', data=surv_active)
+    got_questions = api_admin.get('/api/v1/questions/')
+    assert got_questions['count'] == 3
+
+
 def test_can_update_questions_field(api_admin, surv_active):
     got = api_admin.post('/api/v1/surveys/', data=surv_active)
     data = {'questions': [{'title': 'W?'}]}
-    got_questions = api_admin.get('/api/v1/questions/')
-    assert got_questions['count'] == 3
     api_admin.patch(f'/api/v1/surveys/{got["pk"]}/', data=data)
     got_questions = api_admin.get('/api/v1/questions/')
     assert got_questions['count'] == 1  # unlinked questions are deleted

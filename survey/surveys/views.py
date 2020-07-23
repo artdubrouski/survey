@@ -2,6 +2,7 @@ from rest_framework import filters, viewsets
 from rest_framework.permissions import AllowAny, IsAdminUser
 
 from .models import Question, Survey, SurveyResponse
+from .permissions import IsAdminOrReadOnly
 from .serializers import (
 	QuestionSerializer,
 	SurveyResponseSerializer,
@@ -39,13 +40,7 @@ class SurveyResponseViewSet(viewsets.ModelViewSet):
 
 class SurveyViewSet(viewsets.ModelViewSet):
 	serializer_class = SurveySerializer
-
-	def get_permissions(self):
-		if self.request.method == 'GET':
-			permission_classes = [AllowAny]
-		else:
-			permission_classes = [IsAdminUser]
-		return [permission() for permission in permission_classes]
+	permission_classes = [IsAdminOrReadOnly]
 
 	def get_queryset(self):
 		if self.request.user.is_staff:
