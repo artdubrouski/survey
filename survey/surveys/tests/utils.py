@@ -1,4 +1,4 @@
-from typing import Dict, List, NamedTuple, Tuple, Type
+from typing import Dict, List, NamedTuple
 
 from django.db.models import Q
 
@@ -80,7 +80,7 @@ class CustomSurveyResponse:
 	def get_valid_sr(self) -> Dict:
 		"""Returns a valid survey response."""
 		return self._generate_survey_response()
-	
+
 	def get_another_valid_sr(self) -> Dict:
 		"""
 		Returns another valid survey response with
@@ -130,14 +130,14 @@ class CustomSurveyResponse:
 	def get_invalid_sr_mutselect_for_select(self) -> Dict:
 		"""
 		Returns an invalid survey response, with an List[int] in
-		select option for select question type, which require 
+		select option for select question type, which require
 		an int or a list with one int in response_select field.
 		"""
 		self.sel_response['response_select'] = [
-			self.Rid.sel_mult_pks[1],self.Rid.sel_mult_pks[2],
+			self.Rid.sel_mult_pks[1], self.Rid.sel_mult_pks[2],
 		]
 		return self._generate_survey_response()
-	
+
 	def get_invalid_sr_responses_lt_questions(self) -> Dict:
 		"""
 		Returns an invalid survey response, with
@@ -154,9 +154,9 @@ class CustomSurveyResponse:
 		"""
 		survey_response = self._generate_survey_response()
 		redundant_response = {
-				"question": self.Qid.txt_pk,
-				"response_text": "changed my mind",
-			}
+			"question": self.Qid.txt_pk,
+			"response_text": "changed my mind",
+		}
 		survey_response['responses'].append(redundant_response)
 		return survey_response
 

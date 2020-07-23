@@ -6,7 +6,6 @@ from .utils import CustomSurveyResponse
 pytestmark = [pytest.mark.django_db]
 
 
-
 def test_user_cant_delete_survey(api_admin, api_user, surv_active):
     got = api_admin.post('/api/v1/surveys/', data=surv_active)
     api_user.delete(

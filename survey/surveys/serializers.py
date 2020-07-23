@@ -2,6 +2,9 @@ from typing import List, Union
 
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 
+from rest_framework import serializers
+from rest_framework.serializers import ValidationError
+
 from survey.surveys.models import (
 	Question,
 	Response,
@@ -9,9 +12,6 @@ from survey.surveys.models import (
 	Survey,
 	SurveyResponse,
 )
-
-from rest_framework import serializers
-from rest_framework.serializers import ValidationError
 
 
 class ResponseOptionSerializer(serializers.ModelSerializer):
@@ -66,7 +66,7 @@ class ResponseSerializer(serializers.ModelSerializer):
 			raise ValidationError(
 				f'response_text field is empty for question {q_pk} "{q_title}"'
 			)
-		if ((qtype['is_sel'] or qtype['is_selmult']) and 
+		if ((qtype['is_sel'] or qtype['is_selmult']) and
 				not data.get('response_select')):
 			raise ValidationError(
 				f'response_select field is empty for question {q_pk} "{q_title}"'
@@ -79,7 +79,6 @@ class ResponseSerializer(serializers.ModelSerializer):
 			data.pop('response_text', None)
 		elif qtype['is_txt']:
 			data.pop('response_select', None)
-
 
 	class Meta:
 		model = Response
@@ -108,7 +107,7 @@ class QuestionSerializer(WritableNestedModelSerializer):
 			return 'deleted'
 
 	def update(self, instance, validated_data):
-		if (instance.question_type in ('select', 'select multiple') and 
+		if (instance.question_type in ('select', 'select multiple') and
 				validated_data.get('question_type') == 'text'):
 			instance.response_options.clear()
 		return super().update(instance, validated_data)
@@ -118,8 +117,8 @@ class QuestionSerializer(WritableNestedModelSerializer):
 			raise ValidationError(
 				'Text response does not require response options'
 			)
-		elif (data.get('question_type') in ('select', 'select multiple') and 
-				(not data.get('response_options') or 
+		elif (data.get('question_type') in ('select', 'select multiple') and
+				(not data.get('response_options') or
 				len(data.get('response_options'))) == 1):
 			raise ValidationError('Provide at least two response options.')
 		return data
@@ -198,7 +197,7 @@ class SurveyResponseSerializer(WritableNestedModelSerializer):
 		self._validate_response_questions(responses, survey)
 		self._validate_response_options(responses)
 		return data
-	
+
 	def _validate_user_not_already_taken_survey(self, survey):
 		"""Check if user takes the survey for the first time."""
 		user_id = self.context['request'].COOKIES.get('user_id')

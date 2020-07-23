@@ -1,10 +1,10 @@
 from django.db.models import Q
 
+import pytest
+
 from survey.surveys.models import Response
 
 from .utils import CustomSurveyResponse
-
-import pytest
 
 
 pytestmark = [pytest.mark.django_db]
@@ -142,6 +142,7 @@ def test_responses_cnt_equal_to_questions_cnt(api_admin, api_user, surv_active):
         data=surv_resp,
         expected_status_code=400,
     )
+
 
 def test_user_can_take_survey_only_once(api_admin, api_user, surv_active):
     admin_got = api_admin.post('/api/v1/surveys/', data=surv_active)
